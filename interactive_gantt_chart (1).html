@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bengali Cultural Display - Agile Timeline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            overflow: hidden;
+            border: 1px solid #e9ecef;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .phase-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .phase-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .phase-btn.active {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .phase-btn:hover {
+            background: #495057;
+        }
+
+        .progress-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .progress-bar {
+            width: 200px;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2c3e50, #34495e);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .gantt-container {
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .gantt-chart {
+            min-width: 1200px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .gantt-header {
+            display: grid;
+            grid-template-columns: 300px repeat(16, 70px);
+            background: #2c3e50;
+            color: white;
+            font-weight: 500;
+        }
+
+        .gantt-header div {
+            padding: 15px 10px;
+            text-align: center;
+            border-right: 1px solid #34495e;
+            font-size: 0.9rem;
+        }
+
+        .gantt-row {
+            display: grid;
+            grid-template-columns: 300px repeat(16, 70px);
+            border-bottom: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .gantt-row:hover {
+            background: #f8f9fa;
+        }
+
+        .task-name {
+            padding: 15px;
+            font-weight: 500;
+            background: #f8f9fa;
+            border-right: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sprint-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            background: #2c3e50;
+            border: 2px solid #34495e;
+        }
+
+        .gantt-cell {
+            padding: 8px;
+            position: relative;
+            border-right: 1px solid #f1f3f4;
+            display: flex;
+            align-items: center;
+        }
+
+        .task-bar {
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: #2c3e50;
+            border: 2px solid #34495e;
+            box-shadow: 0 2px 4px rgba(44, 62, 80, 0.2);
+        }
+
+        .task-bar:hover {
+            background: #34495e;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(44, 62, 80, 0.3);
+        }
+
+        .milestone {
+            width: 32px;
+            height: 32px;
+            background: transparent;
+            border: 2px solid #2c3e50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2c3e50;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 auto;
+        }
+
+        .milestone:hover {
+            background: #2c3e50;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .legend {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .legend-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+
+        .legend-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        }
+
+        .legend-discovery { border-color: #2c3e50; }
+        .legend-development { border-color: #34495e; }
+        .legend-launch { border-color: #495057; }
+
+        .legend-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .milestone-list {
+            margin-top: 30px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 25px;
+            border: 1px solid #e9ecef;
+        }
+
+        .milestone-list h3 {
+            color: #343a40;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .milestone-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .milestone-item {
+            background: white;
+            padding: 16px;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .milestone-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .milestone-week {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 6px;
+        }
+
+        .milestone-desc {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: #2c3e50;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 5px;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #2c3e50;
+        }
+
+        .task-bar:hover .tooltip {
+            opacity: 1;
+        }
+
+        .milestone:hover .tooltip {
+            opacity: 1;
+        }
+
+        .completed-sprint .sprint-icon {
+            background: #28a745;
+            border-color: #20c997;
+        }
+
+        .completed-sprint .task-bar {
+            background: #28a745;
+            border-color: #20c997;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .controls { flex-direction: column; align-items: stretch; }
+            .phase-selector { justify-content: center; }
+            .gantt-container { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🇧🇩 Bengali Cultural Display</h1>
+            <p>Agile Project Timeline - From Empathy to Kickstarter Launch</p>
+        </div>
+
+        <div class="controls">
+            <div class="phase-selector">
+                <button class="phase-btn active" data-phase="all">All Phases</button>
+                <button class="phase-btn" data-phase="discovery">Discovery</button>
+                <button class="phase-btn" data-phase="development">Development</button>
+                <button class="phase-btn" data-phase="launch">Launch Prep</button>
+            </div>
+            <div class="progress-info">
+                <span>Project Progress:</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span id="progressPercent">0%</span>
+                <button class="phase-btn" id="exportBtn">📊 Export</button>
+            </div>
+        </div>
+
+        <div class="gantt-container">
+            <div class="gantt-chart">
+                <div class="gantt-header">
+                    <div>Sprint / Task</div>
+                    <div>W1</div>
+                    <div>W2</div>
+                    <div>W3</div>
+                    <div>W4</div>
+                    <div>W5</div>
+                    <div>W6</div>
+                    <div>W7</div>
+                    <div>W8</div>
+                    <div>W9</div>
+                    <div>W10</div>
+                    <div>W11</div>
+                    <div>W12</div>
+                    <div>W13</div>
+                    <div>W14</div>
+                    <div>W15</div>
+                    <div>W16</div>
+                </div>
+
+                <div class="gantt-row" data-phase="discovery">
+                    <div class="task-name">
+                        <div class="sprint-icon">1</div>
+                        Sprint 1: Empathy Research
+                    </div>
+                    <div class="gantt-cell">
+                        <div class="task-bar" style="width: 100%;">
+                            Research
+                            <div class="tooltip">Conduct 6-8 empathy interviews with Bengali users</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell">
+                        <div class="task-bar" style="width: 100%;">
+                            Analysis
+                            <div class="tooltip">Create empathy maps and identify patterns</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                </div>
+
+                <div class="gantt-row" data-phase="discovery">
+                    <div class="task-name">
+                        <div class="sprint-icon">2</div>
+                        Sprint 2: Define & Personas
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell">
+                        <div class="task-bar" style="width: 100%;">
+                            Personas
+                            <div class="tooltip">Create 2-3 detailed user personas from research</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell">
+                        <div class="task-bar" style="width: 100%;">
+                            Stories
+                            <div class="tooltip">Write and prioritize user stories for MVP</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                </div>
+
+                <div class="gantt-row" data-phase="development">
+                    <div class="task-name">
+                        <div class="sprint-icon">3</div>
+                        Sprint 3: Technical Foundation
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell">
+                        <div class="task-bar" style="width: 100%;">
+                            Hardware
+                            <div class="tooltip">Set up Raspberry Pi and connect display</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell">
+                        <div class="task-bar" style="width: 100%;">
+                            Display
+                            <div class="tooltip">Bengali font rendering and basic UI</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                </div>
+
+                <div class="gantt-row" data-phase="development">
+                    <div class="task-name">
+                        <div class="sprint-icon">4</div>
+                        Sprint 4: MVP Core Features
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell">
+                        <div class="task-bar" style="width: 100%;">
+                            Culture
+                            <div class="tooltip">Bengali word rotation and cultural content</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell">
+                        <div class="task-bar" style="width: 100%;">
+                            Family
+                            <div class="tooltip">Family reminder system and web interface</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                </div>
+
+                <div class="gantt-row" data-phase="development">
+                    <div class="task-name">
+                        <div class="sprint-icon">5</div>
+                        Sprint 5: Integration & Polish
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell">
+                        <div class="task-bar" style="width: 100%;">
+                            Integration
+                            <div class="tooltip">Integrate all features and optimize performance</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell">
+                        <div class="task-bar" style="width: 100%;">
+                            Polish
+                            <div class="tooltip">UI polish and personalization features</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                </div>
+
+                <div class="gantt-row" data-phase="development">
+                    <div class="task-name">
+                        <div class="sprint-icon">6</div>
+                        Sprint 6: Beta Testing
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell">
+                        <div class="task-bar" style="width: 100%;">
+                            Beta Deploy
+                            <div class="tooltip">Deploy to 5 beta testers from interviews</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell">
+                        <div class="task-bar" style="width: 100%;">
+                            Iterate
+                            <div class="tooltip">Collect feedback and improve MVP</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                </div>
+
+                <div class="gantt-row" data-phase="launch">
+                    <div class="task-name">
+                        <div class="sprint-icon">7</div>
+                        Sprint 7: Campaign Foundation
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell">
+                        <div class="task-bar" style="width: 100%;">
+                            Content
+                            <div class="tooltip">Video, photos, and campaign copy creation</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell">
+                        <div class="task-bar" style="width: 100%;">
+                            Setup
+                            <div class="tooltip">Kickstarter page setup and reward tiers</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                </div>
+
+                <div class="gantt-row" data-phase="launch">
+                    <div class="task-name">
+                        <div class="sprint-icon">8</div>
+                        Sprint 8: Launch Preparation
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell">
+                        <div class="task-bar" style="width: 100%;">
+                            Production
+                            <div class="tooltip">Manufacturing planning and cost analysis</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell">
+                        <div class="task-bar" style="width: 100%;">
+                            🚀 LAUNCH
+                            <div class="tooltip">Kickstarter campaign goes live!</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Milestone Row -->
+                <div class="gantt-row">
+                    <div class="task-name" style="background: #e9ecef; color: #495057; font-weight: 600;">
+                        🎯 Major Milestones
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell">
+                        <div class="milestone" title="Research Complete">
+                            📊
+                            <div class="tooltip">Research Complete</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell">
+                        <div class="milestone" title="MVP Scope Defined">
+                            📋
+                            <div class="tooltip">MVP Scope Defined</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell">
+                        <div class="milestone" title="Hardware Working">
+                            ⚙️
+                            <div class="tooltip">Hardware Working</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell">
+                        <div class="milestone" title="Core Features Complete">
+                            ✨
+                            <div class="tooltip">Core Features Complete</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell">
+                        <div class="milestone" title="MVP Complete">
+                            🎉
+                            <div class="tooltip">MVP Complete</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell">
+                        <div class="milestone" title="Beta Feedback">
+                            👥
+                            <div class="tooltip">Beta Feedback</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell">
+                        <div class="milestone" title="Campaign Ready">
+                            📹
+                            <div class="tooltip">Campaign Ready</div>
+                        </div>
+                    </div>
+                    <div class="gantt-cell"></div>
+                    <div class="gantt-cell">
+                        <div class="milestone" title="Kickstarter Launch">
+                            🚀
+                            <div class="tooltip">Kickstarter Launch</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item legend-discovery">
+                <div class="legend-title">🔍 Phase 1: Discovery & Validation</div>
+                <p>Deep empathy research with Bengali community, persona development, and user story prioritization</p>
+            </div>
+            <div class="legend-item legend-development">
+                <div class="legend-title">🛠️ Phase 2: MVP Development</div>
+                <p>Hardware setup, core feature development, integration, and beta testing with real users</p>
+            </div>
+            <div class="legend-item legend-launch">
+                <div class="legend-title">🚀 Phase 3: Kickstarter Preparation</div>
+                <p>Campaign content creation, production planning, and successful Kickstarter launch</p>
+            </div>
+        </div>
+
+        <div class="milestone-list">
+            <h3>🎯 Key Milestones & Success Criteria</h3>
+            <div class="milestone-items">
+                <div class="milestone-item">
+                    <div class="milestone-week">Week 2: Research Complete</div>
+                    <div class="milestone-desc">6+ quality empathy interviews completed with clear user insights</div>
+                </div>
+                <div class="milestone-item">
+                    <div class="milestone-week">Week 4: MVP Scope Defined</div>
+                    <div class="milestone-desc">User personas validated, prioritized user stories, technical plan ready</div>
+                </div>
+                <div class="milestone-item">
+                    <div class="milestone-week">Week 6: Hardware Working</div>
+                    <div class="milestone-desc">Raspberry Pi setup complete, Bengali text displays clearly</div>
+                </div>
+                <div class="milestone-item">
+                    <div class="milestone-week">Week 8: Core Features Complete</div>
+                    <div class="milestone-desc">Cultural content rotation + family reminders working</div>
+                </div>
+                <div class="milestone-item">
+                    <div class="milestone-week">Week 10: MVP Complete</div>
+                    <div class="milestone-desc">All features integrated, polished UX, stable operation</div>
+                </div>
+                <div class="milestone-item">
+                    <div class="milestone-week">Week 12: Beta Feedback</div>
+                    <div class="milestone-desc">5 beta testers using daily, positive feedback (8/10+)</div>
+                </div>
+                <div class="milestone-item">
+                    <div class="milestone-week">Week 14: Campaign Ready</div>
+                    <div class="milestone-desc">Professional video, photos, compelling Kickstarter page</div>
+                </div>
+                <div class="milestone-item">
+                    <div class="milestone-week">Week 16: Kickstarter Launch</div>
+                    <div class="milestone-desc">Live campaign with 500+ email subscribers, clear path to profitability</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Phase filtering functionality
+        const phaseButtons = document.querySelectorAll('.phase-btn');
+        const ganttRows = document.querySelectorAll('.gantt-row');
+        
+        phaseButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                if (button.id === 'exportBtn') return; // Skip export button
+                
+                // Update active button
+                phaseButtons.forEach(btn => {
+                    if (btn.id !== 'exportBtn') btn.classList.remove('active');
+                });
+                button.classList.add('active');
+                
+                const phase = button.dataset.phase;
+                
+                // Filter rows
+                ganttRows.forEach(row => {
+                    if (phase === 'all' || row.dataset.phase === phase || !row.dataset.phase) {
+                        row.style.display = 'grid';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Progress management - Start at 0%
+        let completedSprints = [];
+        
+        function initializeProgress() {
+            const progressFill = document.getElementById('progressFill');
+            const progressPercent = document.getElementById('progressPercent');
+            
+            progressFill.style.width = '0%';
+            progressPercent.textContent = '0%';
+        }
+
+        function updateProgress() {
+            const totalSprints = 8;
+            const progressPercentage = (completedSprints.length / totalSprints) * 100;
+            
+            const progressFill = document.getElementById('progressFill');
+            const progressPercent = document.getElementById('progressPercent');
+            
+            progressFill.style.width = progressPercentage + '%';
+            progressPercent.textContent = Math.round(progressPercentage) + '%';
+        }
+
+        function markSprintComplete(sprintNumber) {
+            if (!completedSprints.includes(sprintNumber)) {
+                completedSprints.push(sprintNumber);
+                updateProgress();
+                
+                // Visual feedback for completed sprint
+                const ganttRows = document.querySelectorAll('.gantt-row[data-phase]');
+                const sprintRow = Array.from(ganttRows).find(row => {
+                    const sprintIcon = row.querySelector('.sprint-icon');
+                    return sprintIcon && sprintIcon.textContent.trim() === sprintNumber.toString();
+                });
+                
+                if (sprintRow) {
+                    sprintRow.classList.add('completed-sprint');
+                    const sprintIcon = sprintRow.querySelector('.sprint-icon');
+                    if (sprintIcon) {
+                        sprintIcon.innerHTML = '✓';
+                    }
+                }
+            }
+        }
+
+        // Enhanced interactions
+        const taskBars = document.querySelectorAll('.task-bar');
+        const milestones = document.querySelectorAll('.milestone');
+
+        // Add click handlers for task bars
+        taskBars.forEach(taskBar => {
+            taskBar.addEventListener('click', () => {
+                const row = taskBar.closest('.gantt-row');
+                const taskName = row.querySelector('.task-name').textContent.trim();
+                const sprintMatch = taskName.match(/Sprint (\d+)/);
+                
+                if (sprintMatch) {
+                    const sprintNumber = parseInt(sprintMatch[1]);
+                    if (!completedSprints.includes(sprintNumber)) {
+                        const confirmComplete = confirm(`Mark ${taskName} as complete?\n\nThis will update your project progress.`);
+                        if (confirmComplete) {
+                            markSprintComplete(sprintNumber);
+                        }
+                    } else {
+                        alert(`${taskName} is already completed! ✅`);
+                    }
+                } else {
+                    const tooltip = taskBar.querySelector('.tooltip')?.textContent || 'Task details';
+                    alert(`${taskName}\n\n${tooltip}`);
+                }
+            });
+        });
+
+        // Add click handlers for milestones
+        milestones.forEach(milestone => {
+            milestone.addEventListener('click', () => {
+                const title = milestone.getAttribute('title');
+                alert(`🎯 Milestone: ${title}\n\nThis is a critical project checkpoint. Ensure all deliverables are complete before proceeding to the next phase.`);
+            });
+        });
+
+        // Export functionality
+        function exportTimeline() {
+            const data = {
+                project: 'Bengali Cultural Display',
+                phases: ['Discovery', 'Development', 'Launch'],
+                sprints: 8,
+                duration: '16 weeks',
+                completedSprints: completedSprints,
+                progressPercentage: Math.round((completedSprints.length / 8) * 100),
+                milestones: [
+                    { week: 2, title: 'Research Complete' },
+                    { week: 4, title: 'MVP Scope Defined' },
+                    { week: 6, title: 'Hardware Working' },
+                    { week: 8, title: 'Core Features Complete' },
+                    { week: 10, title: 'MVP Complete' },
+                    { week: 12, title: 'Beta Feedback' },
+                    { week: 14, title: 'Campaign Ready' },
+                    { week: 16, title: 'Kickstarter Launch' }
+                ],
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'bengali-display-timeline.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '1') document.querySelector('[data-phase="discovery"]').click();
+            if (e.key === '2') document.querySelector('[data-phase="development"]').click();
+            if (e.key === '3') document.querySelector('[data-phase="launch"]').click();
+            if (e.key === '0') document.querySelector('[data-phase="all"]').click();
+        });
+
+        // Initialize the timeline
+        initializeProgress();
+
+        // Add export button functionality
+        document.getElementById('exportBtn').addEventListener('click', exportTimeline);
+
+        // Add right-click context menu for tasks
+        taskBars.forEach(taskBar => {
+            taskBar.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                const options = [
+                    '✅ Mark Complete',
+                    '📝 Add Notes', 
+                    '⏰ Set Reminder',
+                    '👥 Assign Team Member',
+                    '🔗 Add Dependencies'
+                ];
+                
+                const choice = prompt('Task Options:\n' + options.map((opt, i) => `${i+1}. ${opt}`).join('\n') + '\n\nSelect option (1-5):');
+                
+                if (choice && choice >= 1 && choice <= 5) {
+                    if (choice == 1) {
+                        // Trigger the same logic as left click for marking complete
+                        taskBar.click();
+                    } else {
+                        alert(`Selected: ${options[choice-1]}\n\nThis would integrate with your project management system!`);
+                    }
+                }
+            });
+        });
+
+        // Weekly status check reminder (demo - every 30 seconds)
+        function weeklyStatusCheck() {
+            if (completedSprints.length < 8) {
+                const nextSprint = completedSprints.length + 1;
+                const sprintGoals = {
+                    1: 'Complete 6-8 empathy interviews',
+                    2: 'Create personas and user stories',
+                    3: 'Set up hardware and basic display',
+                    4: 'Implement core MVP features',
+                    5: 'Integrate and polish features',
+                    6: 'Deploy to beta testers',
+                    7: 'Create campaign content',
+                    8: 'Launch Kickstarter campaign'
+                };
+                
+                if (confirm(`Weekly Status Check!\n\nNext Sprint: Sprint ${nextSprint}\nGoal: ${sprintGoals[nextSprint]}\n\nHave you made progress this week?\n\nClick OK to review your current sprint.`)) {
+                    // Highlight the current sprint
+                    const currentSprintRow = Array.from(document.querySelectorAll('.gantt-row[data-phase]')).find(row => {
+                        const sprintIcon = row.querySelector('.sprint-icon');
+                        return sprintIcon && sprintIcon.textContent.trim() === nextSprint.toString();
+                    });
+                    
+                    if (currentSprintRow) {
+                        currentSprintRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        currentSprintRow.style.backgroundColor = '#fff3cd';
+                        setTimeout(() => {
+                            currentSprintRow.style.backgroundColor = '';
+                        }, 3000);
+                    }
+                }
+            }
+        }
+
+        // Set up periodic reminders (demo - every 30 seconds)
+        setInterval(weeklyStatusCheck, 30000);
+
+        console.log('🚀 Bengali Cultural Display Timeline Loaded!');
+        console.log('💡 Tips:');
+        console.log('   • Use keyboard shortcuts 1-3 to filter phases, 0 for all');
+        console.log('   • Click task bars to mark sprints complete');
+        console.log('   • Right-click tasks for additional options');
+        console.log('   • Click milestones for success criteria');
+        console.log('   • Export your progress with the Export button');
+    </script>
+</body>
+</html>
